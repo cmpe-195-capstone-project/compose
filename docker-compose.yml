@@ -1,0 +1,55 @@
+services:
+    db:
+        image: postgres:17
+        container_name: my-postgres
+        restart: always
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=emberalert_main
+        ports:
+            - "5433:5432"
+        volumes:
+          - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        networks:
+            - ember-alert-network
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    scheduler:
+        image: carlosqmv/scheduler:1.0.0
+        container_name: my-scheduler
+        restart: always
+        ports:
+            - "8001:8000"
+        environment:
+            - DATABASE_URL=postgresql://postgres:postgres@db:5432/emberalert_main
+            - API_URL=https://incidents.fire.ca.gov/umbraco/api/IncidentApi/List?inactive=true
+        networks:
+            - ember-alert-network
+        depends_on:
+            db:
+                condition: service_healthy
+
+    backend:
+        image: carlosqmv/backend:1.3.1
+        container_name: my-backend
+        restart: always
+        ports:
+            - "8000:8000"
+        environment:
+            - DATABASE_URL=postgresql://postgres:postgres@db:5432/emberalert_main
+            - API_URL=https://incidents.fire.ca.gov/umbraco/api/IncidentApi/List?inactive=true
+            - TEST_DB_URL=postgresql://postgres:postgres@db:5432/emberalert_test
+            - ENV=test
+        networks:
+            - ember-alert-network
+        depends_on:
+            db: 
+                condition: service_healthy
+
+networks:
+    ember-alert-network:
+        driver: bridge
