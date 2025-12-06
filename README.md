@@ -1,24 +1,12 @@
 ## EmberAlert Infrastructure & Performance Testing
 
-This repository contains the infrastructure setup (via Docker Compose) and performance testing scripts used for evaluating the EmberAlert backend, and notification pipeline.
-
 It includes:
-- A Dockerized environment for:
-    - PostgreSQL database
-    - Scheduler service (fetches CalFire data and inserts fires into DB)
-    - Backend service (API + WebSocket notifications)
-
-- Automated tests measuring:
-    - REST API latency
-    - Notification latency via WebSocket
+- A Dockerized environment
+- Automated tests
 
 ## Important: Replace the `AWS_IP` Placeholder in Tests
 
-The test scripts reference the backend using a placeholder value:
-``` shell
-BASE_URL = "http://<AWS_IP>"
-```
-> It is left as a placeholder so sensitive infrastructure details are not committed to the repository.
+The test scripts use IP of the EC2 instance with the backend: `BASE_URL = "http://<AWS_IP>"`
 
 Before running the tests, replace `<AWS_IP>` with one of the following:
 
